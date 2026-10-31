@@ -1,0 +1,24 @@
+[
+  {
+    "siteId": "lokaalr1",
+    "siteName": "Lokaal",
+    "domain": "https://www.lokaalr1.com",
+    "apiKeyEnv": "WIX_API_KEY_R1",
+    "accountIdEnv": "WIX_ACCOUNT_ID_R1",
+    "siteIdEnv": "WIX_SITE_ID_R1",
+    "collectionId": "Restaurants",
+    "fields": {
+      "name": "title",
+      "lat": "lat",
+      "lng": "lng",
+      "address": "address",
+      "phone": "phone",
+      "menuUrl": "menuUrl",
+      "pickupMenuUrl": "pickupMenuUrl",
+      "photos": "foodPhotos",
+      "status": "status",
+      "cuisine": "cuisine",
+      "rating": "rating"
+    }
+  }
+]

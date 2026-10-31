@@ -1,0 +1,9 @@
+{
+  "name": "restaurant-map",
+  "version": "1.0.0",
+  "description": "Restaurant map pulling locations from Wix Data collections",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^4.19.2" }
+}

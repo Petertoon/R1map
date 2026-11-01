@@ -1,3 +1,4 @@
+
 [
   {
     "siteId": "lokaalr1",
@@ -18,7 +19,8 @@
       "photos": "image",
       "status": "status",
       "cuisine": "cuisine",
-      "rating": "rating"
+      "rating": "rating",
+      "hours": "hours"
     }
   }
 ]

@@ -1,3 +1,4 @@
+
 // routes/restaurants.js
 const express = require("express");
 const router = express.Router();
@@ -24,13 +25,14 @@ function extractPhotos(value) {
     .slice(0, 5);
 }
 
-// Accept full URLs or site-relative paths ("/menu") from text or link fields.
+// Accept full URLs, site-relative paths ("/menu"), or bare addresses ("www.site.com/menu").
 function toUrl(value, domain) {
   if (!value) return null;
-  const v = typeof value === "string" ? value : value.url || value.href;
-  if (!v || typeof v !== "string") return null;
+  const v = (typeof value === "string" ? value : value.url || value.href || "").trim();
+  if (!v) return null;
   if (/^https?:\/\//i.test(v)) return v;
   if (v.startsWith("/")) return `${domain}${v}`;
+  if (/^[^\s/]+\.[^\s/]+/.test(v)) return `https://${v}`; // looks like a domain with no https://
   return null;
 }
 

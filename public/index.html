@@ -333,6 +333,13 @@
       pill.style.display = st.pill ? "" : "none";
       pill.className = "card-status " + (st.state === "open" ? "status-open" : st.state === "closed" ? "status-closed"
         : st.state === "soon" ? "status-paused" : statusClass(st.pill));
+      // Pickup is only available while the restaurant is open (by its hours) and not marked paused/closed
+      const pick = card.querySelector('[data-role="pickup"]');
+      if (pick && pick.dataset.url) {
+        const off = st.state === "closed" || (st.state === "manual" && /paus|closed|unavailable/i.test(st.pill));
+        if (off) { pick.removeAttribute("href"); pick.classList.add("disabled"); }
+        else { pick.setAttribute("href", pick.dataset.url); pick.classList.remove("disabled"); }
+      }
       line.textContent = st.detail;
       line.style.display = st.detail ? "" : "none";
       line.className = "card-hours " + (st.state === "open" ? "open" : st.state === "closed" ? "closed" : st.state === "soon" ? "soon" : "");
@@ -352,9 +359,10 @@
       if (card) card.classList.add("active");
     }
 
-    function button(label, href, secondary) {
+    function button(label, href, secondary, role) {
       const cls = "card-btn" + (secondary ? " secondary" : "") + (href ? "" : " disabled");
-      return '<a class="' + cls + '"' + (href ? ' href="' + esc(href) + '" target="_blank" rel="noopener"' : "") + ">" + label + "</a>";
+      return '<a class="' + cls + '"' + (role ? ' data-role="' + role + '"' : "") +
+        (href ? ' data-url="' + esc(href) + '" href="' + esc(href) + '" target="_blank" rel="noopener"' : "") + ">" + label + "</a>";
     }
 
     function renderCardStrip() {
@@ -388,7 +396,7 @@
             '<div class="card-buttons">' +
               button("Menu", r.menuUrl) +
               button("Directions", directions, true) +
-              button("Pickup Menu", r.pickupMenuUrl) +
+              button("Pickup Menu", r.pickupMenuUrl, false, "pickup") +
               button("Call", r.phone ? "tel:" + r.phone : null, true) +
             "</div>" +
           "</div>";

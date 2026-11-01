@@ -36,6 +36,17 @@ function toUrl(value, domain) {
   return null;
 }
 
+// Read a field by its configured key, ignoring upper/lower case. If that finds nothing,
+// fall back to any field whose name matches `fallback` (e.g. a differently spelled pickup field).
+function getField(d, key, fallback) {
+  if (key && d[key] != null && d[key] !== "") return d[key];
+  const lower = String(key || "").toLowerCase();
+  const names = Object.keys(d);
+  const hit = names.find((n) => n.toLowerCase() === lower && d[n] != null && d[n] !== "")
+    || (fallback && names.find((n) => fallback.test(n) && d[n] != null && d[n] !== ""));
+  return hit ? d[hit] : null;
+}
+
 function cleanPhone(value) {
   if (!value || typeof value !== "string") return null;
   const cleaned = value.replace(/[^0-9+]/g, "");
@@ -92,8 +103,8 @@ async function fetchSite(site) {
         rating: parseFloat(d[f.rating]) || null,
         status: d[f.status] || null,
         phone: cleanPhone(d[f.phone]),
-        menuUrl: toUrl(d[f.menuUrl], site.domain),
-        pickupMenuUrl: toUrl(d[f.pickupMenuUrl], site.domain),
+        menuUrl: toUrl(getField(d, f.menuUrl), site.domain),
+        pickupMenuUrl: toUrl(getField(d, f.pickupMenuUrl, /pick.?up/i), site.domain),
         photos: extractPhotos(d[f.photos]),
       });
     }

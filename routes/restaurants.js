@@ -101,6 +101,7 @@ async function fetchSite(site) {
         address: d[f.address] || null,
         cuisine: d[f.cuisine] || null,
         rating: parseFloat(d[f.rating]) || null,
+        hours: getField(d, f.hours, /hours/i),
         status: d[f.status] || null,
         phone: cleanPhone(d[f.phone]),
         menuUrl: toUrl(getField(d, f.menuUrl), site.domain),

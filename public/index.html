@@ -59,11 +59,26 @@
     }
     .card-btn.secondary { background: #f0f0f0; color: #111; }
     .card-btn.disabled { opacity: 0.35; pointer-events: none; }
+    #locate-btn {
+      position: absolute; top: -56px; left: 12px; width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0;
+      background: rgba(255,255,255,0.96); box-shadow: 0 2px 8px rgba(0,0,0,0.35); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #locate-btn.busy { opacity: 0.6; }
+    #locate-msg {
+      position: absolute; top: -50px; left: 64px; right: 12px; font-size: 13px; font-weight: 600; color: #111;
+      background: rgba(255,255,255,0.96); padding: 6px 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: none;
+    }
+    .me-dot { width: 16px; height: 16px; border-radius: 50%; background: #1a73e8; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(26,115,232,0.35), 0 1px 4px rgba(0,0,0,0.4); }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="bottom-panel">
+    <button id="locate-btn" aria-label="Show my location" title="Show my location">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2-8-8-2z"/></svg>
+    </button>
+    <div id="locate-msg"></div>
     <div id="panel-handle"><div class="bar"></div></div>
     <div id="result-count"></div>
     <div id="card-strip"></div>
@@ -385,6 +400,35 @@
 
     map.on("load", loadRestaurants);
     map.on("moveend", renderCardStrip); // all restaurants load once; just refresh the visible cards
+
+    // ---- "Center on my location" button ----
+    const locateBtn = document.getElementById("locate-btn");
+    const locateMsg = document.getElementById("locate-msg");
+    let meMarker = null, msgTimer = null;
+    function showLocateMsg(text) {
+      locateMsg.textContent = text; locateMsg.style.display = "block";
+      clearTimeout(msgTimer); msgTimer = setTimeout(() => (locateMsg.style.display = "none"), 5000);
+    }
+    locateBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) return showLocateMsg("Your browser can't share your location.");
+      locateBtn.classList.add("busy");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          locateBtn.classList.remove("busy");
+          const c = [pos.coords.longitude, pos.coords.latitude];
+          if (!meMarker) {
+            const el = document.createElement("div"); el.className = "me-dot";
+            meMarker = new mapboxgl.Marker({ element: el }).setLngLat(c).addTo(map);
+          } else meMarker.setLngLat(c);
+          map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 12), offset: [0, -(panel.offsetHeight + PANEL_BOTTOM) / 2] });
+        },
+        (err) => {
+          locateBtn.classList.remove("busy");
+          showLocateMsg(err.code === 1 ? "Location is blocked. Allow it in your browser or phone settings." : "Couldn't find your location. Try again.");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    });
 
     // ---- Collapsible bottom panel ----
     const panel = document.getElementById("bottom-panel");

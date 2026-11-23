@@ -121,13 +121,47 @@ async function fetchSite(site) {
   return out;
 }
 
+// City banners: a small CMS collection (default name "CityBanners") with a title (the city name) and an image.
+// A row titled "All Cities" (or "Default") is used when no city is picked. Missing collection = no banners, no error.
+let bannerCache = { data: [], expires: 0 };
+async function fetchBanners() {
+  if (bannerCache.expires > Date.now()) return bannerCache.data;
+  const site = sites[0];
+  const apiKey = process.env[site.apiKeyEnv];
+  const accountId = process.env[site.accountIdEnv];
+  const wixSiteId = process.env[site.siteIdEnv];
+  if (!apiKey || !accountId || !wixSiteId) return [];
+  const out = [];
+  try {
+    const res = await fetch("https://www.wixapis.com/wix-data/v2/items/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: apiKey, "wix-account-id": accountId, "wix-site-id": wixSiteId },
+      body: JSON.stringify({ dataCollectionId: site.bannerCollectionId || "CityBanners", query: { paging: { limit: 100 } } }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      for (const item of json.dataItems || []) {
+        const d = item.data || {};
+        const city = cleanText(d.title || d.city);
+        const image = extractPhotos([d.image || d.banner])[0];
+        if (city && image) out.push({ city, image });
+      }
+    }
+  } catch (err) {
+    console.error("Banner fetch failed:", err.message);
+  }
+  bannerCache = { data: out, expires: Date.now() + CACHE_TTL_MS };
+  return out;
+}
+
 router.get("/", async (req, res) => {
   try {
     const results = await Promise.all(sites.map(fetchSite));
     const restaurants = results.flat();
+    const banners = await fetchBanners();
     res.set("Access-Control-Allow-Origin", "*"); // lets the Wix pages read this list from another address
     res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-    res.json({ count: restaurants.length, restaurants });
+    res.json({ count: restaurants.length, restaurants, banners });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal error" });

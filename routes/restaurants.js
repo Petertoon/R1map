@@ -103,6 +103,7 @@ async function fetchSite(site) {
         lng,
         address: d[f.address] || null,
         cuisine: d[f.cuisine] || null,
+        region: cleanText(getField(d, f.region || "region")),
         city: cleanText(getField(d, f.city || "city")),
         area: cleanText(getField(d, f.area || "area")),
         rating: parseFloat(d[f.rating]) || null,
@@ -111,6 +112,7 @@ async function fetchSite(site) {
         phone: cleanPhone(d[f.phone]),
         menuUrl: toUrl(getField(d, f.menuUrl), site.domain),
         pickupMenuUrl: toUrl(getField(d, f.pickupMenuUrl, /pick.?up/i), site.domain),
+        deliveryUrl: toUrl(getField(d, f.deliveryUrl || "deliveryUrl", /deliver/i), site.domain),
         photos: extractPhotos(d[f.photos]),
       });
     }

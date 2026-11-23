@@ -103,7 +103,7 @@ async function fetchSite(site) {
         lng,
         address: d[f.address] || null,
         cuisine: d[f.cuisine] || null,
-        region: cleanText(getField(d, f.region || "region")),
+        region: cleanText(getField(d, f.region || "region")) || site.region || null,
         city: cleanText(getField(d, f.city || "city")),
         area: cleanText(getField(d, f.area || "area")),
         rating: parseFloat(d[f.rating]) || null,

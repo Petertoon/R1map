@@ -15,7 +15,7 @@
       --ink: #2b2b2b;
     }
     * { box-sizing: border-box; }
-    html, body { margin: 0; background: transparent; font-family: "Montserrat", system-ui, -apple-system, sans-serif; color: var(--ink); }
+    html, body { margin: 0; background: #2f3a31; font-family: "Montserrat", system-ui, -apple-system, sans-serif; color: var(--ink); }
     body { padding: 12px 12px 24px; }
 
     /* ---- optional top section (region, Map, Order Online, banner) ---- */
@@ -149,7 +149,7 @@
       regionUrl: "",                                           // optional: address of a region picker page
       mapUrl: "https://r1map.onrender.com/",                   // the restaurant map
       orderUrl: "https://www.lokaalr1.com/online-ordering",    // your Order Online page
-      heroImage: "https://r1map.onrender.com/banner.jpg",      // banner photo (upload banner.jpg to the public folder)
+      heroImage: "https://r1map.onrender.com/banner.jpg",      // fallback banner if the CMS has none (upload banner.jpg to the public folder)
     };
     const DEFAULT_STATE = "TX"; // shown after the city (e.g. "Midland, TX") unless the address already has a state
 
@@ -165,12 +165,22 @@
       if (TOP.region) { const r = document.getElementById("region-pill"); if (TOP.regionUrl) r.href = TOP.regionUrl; } else document.getElementById("region-pill").style.display = "none";
       link("map-pill", TOP.mapUrl); link("order-pill", TOP.orderUrl);
       if (!TOP.mapUrl && !TOP.orderUrl) document.querySelector(".pill-row").style.display = "none";
-      if (TOP.heroImage) { // only show the banner if the photo really loads
-        const img = new Image();
-        img.onload = () => { const h = document.getElementById("hero"); h.style.backgroundImage = 'url("' + TOP.heroImage + '")'; h.classList.add("show"); };
-        img.src = TOP.heroImage;
-      }
-    })();
+        })();
+
+    // ---- BANNER (changes with the picked city, from the CityBanners collection in the CMS) ----
+    let banners = []; // [{ city, image }]
+    const cleanCity = (c) => String(c || "").replace(/[,\s]+(tx|texas)\.?$/i, "").trim();
+    function setBanner() {
+      if (!TOP.show) return;
+      const h = document.getElementById("hero");
+      const byCity = (k) => (banners.find((b) => norm(cleanCity(b.city)) === k) || {}).image;
+      const url = (city && byCity(city)) || byCity("all cities") || byCity("default") || byCity("all") || TOP.heroImage;
+      if (!url) { h.classList.remove("show"); return; }
+      const img = new Image(); // only show the banner if the photo really loads
+      img.onload = () => { h.style.backgroundImage = 'url("' + url + '")'; h.classList.add("show"); };
+      img.onerror = () => h.classList.remove("show");
+      img.src = url;
+    }
 
     let all = [];              // every restaurant
     let city = "";             // normalized city, "" = all cities
@@ -231,7 +241,7 @@
     function setCity(key) {
       city = key; area = "";
       label.textContent = key ? cityLabels.get(key) : "Select City";
-      buildCityList(); buildAreas(); render();
+      buildCityList(); buildAreas(); render(); setBanner();
     }
 
     btn.addEventListener("click", (e) => {
@@ -261,7 +271,8 @@
         if (!json || !Array.isArray(json.restaurants)) throw new Error("Bad response");
         // "Seminole Tx" or "Seminole, TX" in the CMS is shown as just "Seminole"
         all = json.restaurants.map((r) => ({ ...r, city: r.city ? r.city.replace(/[,\s]+(tx|texas)\.?$/i, "").trim() : r.city }));
-        buildCityList(); buildAreas(); render();
+        banners = json.banners || [];
+        buildCityList(); buildAreas(); render(); setBanner();
       } catch (err) {
         console.error(err);
         if (attempt < 12) setTimeout(() => load(attempt + 1), 5000);

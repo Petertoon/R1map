@@ -138,7 +138,8 @@
 
   <script>
     // ---- SETTINGS ----
-    const API_ENDPOINT = "/api/restaurants";
+    // Full address on purpose: it works wherever Wix shows this page (embedded site, WebView or preview).
+    const API_ENDPOINT = "https://r1map.onrender.com/api/restaurants";
     // Optional top section like your mock-up (region pill, Map and Order Online buttons, banner photo).
     // Your Wix page already has these above this box, so it is OFF by default. To use it here, set show to true
     // and fill in the web addresses. Anything left as "" is hidden.
@@ -247,7 +248,8 @@
         if (!res.ok) throw new Error("HTTP " + res.status);
         const json = await res.json();
         if (!json || !Array.isArray(json.restaurants)) throw new Error("Bad response");
-        all = json.restaurants;
+        // "Seminole Tx" or "Seminole, TX" in the CMS is shown as just "Seminole"
+        all = json.restaurants.map((r) => ({ ...r, city: r.city ? r.city.replace(/[,\s]+(tx|texas)\.?$/i, "").trim() : r.city }));
         buildCityList(); buildAreas(); render();
       } catch (err) {
         console.error(err);

@@ -74,7 +74,7 @@
     .results-head { display: flex; align-items: center; gap: 12px; background: var(--maroon); color: #fff; padding: 10px 12px; border-radius: 18px 18px 0 0; }
     .results-head svg { width: 34px; height: 34px; flex: none; }
     .results-head h2 { flex: 1; margin: 0; font-size: 19px; font-weight: 800; line-height: 1.15; }
-    .count { flex: none; background: #fff; color: #222; border-radius: 18px; padding: 6px 14px; font-size: 15px; font-weight: 700; }
+    .count { flex: none; background: #fff; color: #222; border-radius: 18px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
 
     .row { display: flex; align-items: center; gap: 14px; padding: 8px 12px; text-decoration: none; color: inherit; border-top: 1px solid var(--line); }
     .row:first-of-type { border-top: 0; }
@@ -143,7 +143,14 @@
     // Optional top section like your mock-up (region pill, Map and Order Online buttons, banner photo).
     // Your Wix page already has these above this box, so it is OFF by default. To use it here, set show to true
     // and fill in the web addresses. Anything left as "" is hidden.
-    const TOP = { show: false, region: "432 Midland Region", regionUrl: "", mapUrl: "", orderUrl: "", heroImage: "" };
+    const TOP = {
+      show: true,
+      region: "432 Midland Region",
+      regionUrl: "",                                           // optional: address of a region picker page
+      mapUrl: "https://r1map.onrender.com/",                   // the restaurant map
+      orderUrl: "https://www.lokaalr1.com/online-ordering",    // your Order Online page
+      heroImage: "https://r1map.onrender.com/banner.jpg",      // banner photo (upload banner.jpg to the public folder)
+    };
     const DEFAULT_STATE = "TX"; // shown after the city (e.g. "Midland, TX") unless the address already has a state
 
     const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -158,7 +165,11 @@
       if (TOP.region) { const r = document.getElementById("region-pill"); if (TOP.regionUrl) r.href = TOP.regionUrl; } else document.getElementById("region-pill").style.display = "none";
       link("map-pill", TOP.mapUrl); link("order-pill", TOP.orderUrl);
       if (!TOP.mapUrl && !TOP.orderUrl) document.querySelector(".pill-row").style.display = "none";
-      if (TOP.heroImage) { const h = document.getElementById("hero"); h.style.backgroundImage = 'url("' + TOP.heroImage + '")'; h.classList.add("show"); }
+      if (TOP.heroImage) { // only show the banner if the photo really loads
+        const img = new Image();
+        img.onload = () => { const h = document.getElementById("hero"); h.style.backgroundImage = 'url("' + TOP.heroImage + '")'; h.classList.add("show"); };
+        img.src = TOP.heroImage;
+      }
     })();
 
     let all = [];              // every restaurant
@@ -209,7 +220,7 @@
         const photo = (r.photos || [])[0];
         const thumb = '<div class="thumb">' + (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.remove()">' : "🍽️") + "</div>";
         const place = r.city ? esc(cityLabels.get(norm(r.city)) || r.city) + ", " + esc(stateOf(r)) : esc(r.address || "");
-        const inner = thumb + '<div class="info"><div class="name">' + esc(r.name) + '</div><div class="where">' + icon("i-pin") + "<span>" + place + "</span></div></div>" + icon("i-chev-right", "chev-right");
+        const inner = thumb + '<div class="info"><div class="name">' + esc(r.name) + "</div>" + (place ? '<div class="where">' + icon("i-pin") + "<span>" + place + "</span></div>" : "") + "</div>" + icon("i-chev-right", "chev-right");
         // target="_top" opens the menu in the whole Wix page, not inside this small box
         return r.menuUrl
           ? '<a class="row" href="' + esc(r.menuUrl) + '" target="_top">' + inner + "</a>"

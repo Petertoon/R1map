@@ -251,8 +251,8 @@
         buildCityList(); buildAreas(); render();
       } catch (err) {
         console.error(err);
-        if (attempt < 6) setTimeout(() => load(attempt + 1), 4000);
-        else document.getElementById("rows").innerHTML = '<div class="msg">Couldn\'t load restaurants. Please reload the page.</div>';
+        if (attempt < 12) setTimeout(() => load(attempt + 1), 5000);
+        else document.getElementById("rows").innerHTML = '<div class="msg">Couldn\'t load restaurants. Please reload the page.<br><small style="font-weight:500;opacity:.7">(' + esc(err && err.message) + ")</small></div>";
       }
     }
     load();

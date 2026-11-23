@@ -8,113 +8,143 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --maroon: #7e231a;       /* header bars and borders */
-      --cream: #fbf0df;        /* dropdown and rows */
+      --bg: #113c2a;           /* page background */
+      --maroon: #7e231a;       /* header bars, borders, Menu button */
+      --cream: #fbf0df;        /* dropdowns and rows */
       --green: #1c5a1f;        /* restaurant names */
       --line: #cdbfa8;         /* lines between rows */
       --ink: #2b2b2b;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; background: #2f3a31; font-family: "Montserrat", system-ui, -apple-system, sans-serif; color: var(--ink); }
-    body { padding: 12px 12px 24px; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; background: var(--bg); font-family: "Montserrat", system-ui, -apple-system, sans-serif; color: var(--ink); }
+    body { padding: 12px 12px 28px; }
+    svg { display: block; }
 
-    /* ---- optional top section (region, Map, Order Online, banner) ---- */
-    #top { display: none; margin-bottom: 14px; }
-    #top.show { display: block; }
-    .pill {
-      display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; border-radius: 30px;
-      font-weight: 800; font-size: 20px; padding: 9px 16px; line-height: 1.1;
+    /* ---- top buttons ---- */
+    .top-row { display: flex; gap: 12px; align-items: stretch; }
+    .top-row > * { flex: 1; min-width: 0; }
+    .select-wrap { position: relative; }
+    .btn-region, .btn-map {
+      display: flex; align-items: center; gap: 8px; width: 100%; height: 100%; min-height: 64px; padding: 8px 10px; border-radius: 22px;
+      font: 800 17px/1.05 "Montserrat", system-ui, sans-serif; text-decoration: none; cursor: pointer; text-align: left;
     }
-    .pill.region { background: var(--maroon); color: #fff; border: 3px solid var(--cream); margin: 0 6px 12px; }
-    .pill.region svg { width: 24px; height: 24px; }
-    .pill-row { display: flex; gap: 12px; margin: 0 2px 12px; }
-    .pill.map { flex: 1; background: var(--cream); color: var(--maroon); border: 3px solid #a3281c; font-size: 20px; }
-    .pill.order { flex: 1.2; background: var(--cream); color: var(--green); border: 3px solid #3a9a37; font-size: 17px; white-space: nowrap; }
-    .pill svg { width: 26px; height: 26px; flex: none; }
-    .pill.order .dl { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; }
-    .pill.order .dl svg { width: 18px; height: 18px; }
-    #hero { display: none; margin: 0 -12px 14px; height: 72px; background-size: cover; background-position: center; }
+    .btn-region { background: linear-gradient(#fdf4e4, #f1e2c8); color: #7e231a; border: 3px solid #c5532b; box-shadow: 0 0 0 2px #f0d9bd, 0 3px 8px rgba(0,0,0,.4); }
+    .btn-map { background: linear-gradient(#2f8c3a, #1c5e22); color: #fff; border: 3px solid #eadcc2; box-shadow: 0 3px 8px rgba(0,0,0,.4); justify-content: center; }
+    .btn-region .ico, .btn-map .ico { width: 32px; height: 32px; flex: none; }
+    .btn-region .label { flex: 1; }
+    .btn-region .chev, .btn-map .chev { width: 20px; height: 20px; flex: none; }
+    .btn-region[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+    #hero { display: none; margin: 12px -12px 0; height: 66px; background-size: cover; background-position: center; }
     #hero.show { display: block; }
 
-    .title { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 28px; font-weight: 800; margin: 4px 6px 12px; }
-    .title svg { width: 34px; height: 34px; flex: none; }
+    .title { display: flex; align-items: center; gap: 12px; color: #fff; font-size: 26px; font-weight: 800; margin: 14px 2px 12px; justify-content: center; }
+    .title::before, .title::after { content: ""; flex: 1; height: 2px; background: rgba(255,255,255,.65); }
+    .title svg { width: 32px; height: 32px; flex: none; }
 
-    /* ---- city dropdown ---- */
-    .select-wrap { position: relative; }
+    /* ---- dropdowns ---- */
     #city-btn {
-      width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--cream);
-      border: 3px solid var(--maroon); box-shadow: 0 0 0 2px #f1dcc0; border-radius: 30px; font: 800 24px "Montserrat", system-ui, sans-serif; color: var(--maroon); cursor: pointer; text-align: left;
+      width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: linear-gradient(#fdf4e4, #f1e2c8);
+      border: 3px solid var(--maroon); box-shadow: 0 0 0 2px #f1dcc0, 0 3px 8px rgba(0,0,0,.35); border-radius: 30px; font: 800 22px "Montserrat", system-ui, sans-serif; color: var(--maroon); cursor: pointer; text-align: left;
     }
     #city-btn svg.icon { width: 32px; height: 32px; flex: none; }
     #city-btn .label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #city-btn .chev { width: 28px; height: 28px; flex: none; transition: transform 0.15s; }
+    #city-btn .chev { width: 28px; height: 28px; flex: none; transition: transform .15s; }
     #city-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
-    #city-list {
-      display: none; position: absolute; left: 10px; right: 10px; top: calc(100% + 6px); z-index: 10; margin: 0; padding: 6px; list-style: none;
-      background: var(--cream); border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.45); max-height: 340px; overflow-y: auto;
+    .dd-list {
+      display: none; position: absolute; left: 6px; right: 6px; top: calc(100% + 6px); z-index: 20; margin: 0; padding: 6px; list-style: none;
+      background: var(--cream); border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.5); max-height: 340px; overflow-y: auto;
     }
-    #city-list.open { display: block; }
-    #city-list li {
-      display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; font-size: 19px; font-weight: 700; color: #3a2a26; cursor: pointer;
-    }
-    #city-list li svg { width: 22px; height: 22px; flex: none; color: var(--maroon); }
-    #city-list li.sel { background: var(--maroon); color: #fff; }
-    #city-list li.sel svg { color: #fff; }
+    .dd-list.open { display: block; }
+    .dd-list li { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; font-size: 18px; font-weight: 700; color: #3a2a26; cursor: pointer; }
+    .dd-list li svg { width: 22px; height: 22px; flex: none; color: var(--maroon); }
+    .dd-list li.sel { background: var(--maroon); color: #fff; }
+    .dd-list li.sel svg { color: #fff; }
+    #region-list { left: 0; right: -40px; }
 
-    /* ---- area chips ---- */
     #areas { display: none; flex-wrap: wrap; gap: 8px; margin: 12px 2px 0; }
     #areas.show { display: flex; }
-    #areas button {
-      border: 2px solid var(--maroon); background: transparent; color: #f1e8d8; border-radius: 20px; padding: 7px 14px; font: 600 14px "Montserrat", system-ui, sans-serif; cursor: pointer;
-    }
+    #areas button { border: 2px solid var(--cream); background: transparent; color: var(--cream); border-radius: 20px; padding: 7px 14px; font: 700 14px "Montserrat", system-ui, sans-serif; cursor: pointer; }
     #areas button.sel { background: var(--cream); color: var(--maroon); }
 
     /* ---- results ---- */
-    .results { margin-top: 16px; background: var(--cream); border: 3px solid var(--cream); border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-    .results-head { display: flex; align-items: center; gap: 12px; background: var(--maroon); color: #fff; padding: 10px 12px; border-radius: 18px 18px 0 0; }
-    .results-head svg { width: 34px; height: 34px; flex: none; }
+    .results { margin-top: 16px; background: var(--cream); border: 3px solid var(--cream); border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+    .results-head { display: flex; align-items: center; gap: 12px; background: linear-gradient(#8f2a1f, #741f17); color: #fff; padding: 10px 12px; border-radius: 18px 18px 0 0; }
+    .results-head svg { width: 32px; height: 32px; flex: none; }
     .results-head h2 { flex: 1; margin: 0; font-size: 19px; font-weight: 800; line-height: 1.15; }
     .count { flex: none; background: #fff; color: #222; border-radius: 18px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
 
-    .row { display: flex; align-items: center; gap: 14px; padding: 8px 12px; text-decoration: none; color: inherit; border-top: 1px solid var(--line); }
-    .row:first-of-type { border-top: 0; }
+    .rest { border-top: 1px solid var(--line); }
+    .rest:first-child { border-top: 0; }
+    .rest.open { border: 3px solid #2e7d32; border-radius: 18px; margin: 6px 5px; background: #fff7e8; }
+    .rest-head { display: flex; align-items: center; gap: 14px; padding: 8px 12px; cursor: pointer; }
+    .rest.open .rest-head { padding-bottom: 6px; }
     .thumb { flex: none; width: 88px; height: 58px; border-radius: 11px; overflow: hidden; background: #d8cdb9; display: flex; align-items: center; justify-content: center; font-size: 26px; }
     .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .info { flex: 1; min-width: 0; }
-    .name { font-size: 17px; font-weight: 800; color: var(--green); line-height: 1.12; letter-spacing: -0.2px; }
+    .name { font-size: 17px; font-weight: 800; color: var(--green); line-height: 1.12; letter-spacing: -.2px; }
     .where { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 15px; font-weight: 500; color: #2b2b2b; }
     .where svg { width: 16px; height: 16px; flex: none; color: var(--green); }
-    .chev-right { width: 28px; height: 28px; flex: none; color: var(--green); }
-    .row.nolink { cursor: default; }
-    .row.nolink .chev-right { visibility: hidden; }
+    .rest-head .chev { width: 28px; height: 28px; flex: none; color: var(--green); }
+
+    .acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 4px 8px 10px; }
+    .act {
+      display: flex; align-items: center; justify-content: center; gap: 4px; padding: 10px 3px; border-radius: 12px; text-decoration: none; color: #fff;
+      font: 800 12px/1.1 "Montserrat", system-ui, sans-serif; text-align: left; min-height: 46px; box-shadow: 0 2px 4px rgba(0,0,0,.25);
+    }
+    .act svg { width: 19px; height: 19px; flex: none; }
+    .act.menu { background: linear-gradient(#9a2d20, #741f17); }
+    .act.call { background: linear-gradient(#2f8c3a, #1c5e22); }
+    .act.pickup { background: linear-gradient(#c8741f, #a35a14); }
+    .act.delivery { background: linear-gradient(#2a7a32, #1a5420); }
+    .act.off { opacity: .38; box-shadow: none; filter: grayscale(.4); cursor: default; }
+    @media (min-width: 460px) { .act { font-size: 14px; gap: 8px; } .act svg { width: 24px; height: 24px; } }
+
     .msg { padding: 22px 16px; text-align: center; font-size: 16px; font-weight: 600; color: #3a2a26; }
   </style>
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute">
+    <symbol id="i-mapin" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M24 4a8 8 0 0 0-8 8c0 6.5 8 15 8 15s8-8.500 8-15a8 8 0 0 0-8-8z"/><circle cx="24" cy="12" r="2.8"/>
+      <path d="M13 25 5 30v13l9-4 10 4 10-4 9 4V30l-8-5"/><path d="M14 39V30M34 39V30"/>
+    </symbol>
     <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
       <path d="M3 21V9l5-3v15M8 21V3l8 3v15M16 21V11l5 2v8M2 21h20M11 9v.01M11 13v.01M11 17v.01M5.5 12v.01M5.5 16v.01M18.5 16v.01"/>
     </symbol>
     <symbol id="i-fork" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 3v7a2 2 0 0 0 2 2v9M9 3v7a2 2 0 0 1-2 2M7 3v6M17 21V3c-2.2 1.5-3 4.5-3 8h3"/>
+      <path d="M5 3v7a2 2 0 0 0 2 2v9M9 3v7a2 2 0 0 1-2 2M7 3v6M17 21V3c-2.200 1.500-3 4.500-3 8h3"/>
     </symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.500A2.500 2.500 0 1 1 12 6.500a2.500 2.500 0 0 1 0 5z"/></symbol>
     <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 9 7 7 7-7"/></symbol>
+    <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7"/></symbol>
     <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></symbol>
-    <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v14m-6-6 6 6 6-6"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 5 5L19.5 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 5 5L19.500 7"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="3" width="14" height="18" rx="2"/><path d="M3 7h3M3 12h3M3 17h3M9 8h6M9 12h6M9 16h4"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="currentColor"><path d="M6.600 10.800a15.100 15.100 0 0 0 6.600 6.600l2.200-2.200a1 1 0 0 1 1-.25 11.400 11.400 0 0 0 3.600.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.500a1 1 0 0 1 1 1c0 1.250.2 2.450.57 3.600a1 1 0 0 1-.25 1z"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+    </symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 5h7v10H9z M16 9h3l3 3v3h-6"/><circle cx="8" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><path d="M2 8h4M3 11h3M4 14h2"/>
+    </symbol>
   </svg>
 
-  <div id="top">
-    <a class="pill region" id="region-pill" target="_top"><span id="region-text"></span><svg><use href="#i-chev-down"/></svg></a>
-    <div class="pill-row">
-      <a class="pill map" id="map-pill" target="_top"><svg><use href="#i-pin"/></svg><span>Map</span></a>
-      <a class="pill order" id="order-pill" target="_top"><span>Order Online</span><span class="dl"><svg><use href="#i-down"/></svg></span></a>
+  <div class="top-row" id="top-row">
+    <div class="select-wrap" id="region-wrap" style="display:none">
+      <button class="btn-region" id="region-btn" aria-haspopup="listbox" aria-expanded="false">
+        <svg class="ico"><use href="#i-mapin"/></svg><span class="label" id="region-label">Select Region</span><svg class="chev"><use href="#i-chev-down"/></svg>
+      </button>
+      <ul class="dd-list" id="region-list" role="listbox"></ul>
     </div>
-    <div id="hero"></div>
+    <a class="btn-map" id="map-btn" target="_top" style="display:none"><svg class="ico"><use href="#i-mapin"/></svg><span>Open Map</span><svg class="chev"><use href="#i-chev-right"/></svg></a>
   </div>
 
-  <div class="title"><svg style="color:#fff"><use href="#i-fork"/></svg><span>Find a Restaurant</span></div>
+  <div id="hero"></div>
+
+  <div class="title"><svg><use href="#i-fork"/></svg><span>Find a Restaurant</span></div>
 
   <div class="select-wrap">
     <button id="city-btn" aria-haspopup="listbox" aria-expanded="false">
@@ -122,7 +152,7 @@
       <span class="label" id="city-label">Select City</span>
       <svg class="chev"><use href="#i-chev-down"/></svg>
     </button>
-    <ul id="city-list" role="listbox"></ul>
+    <ul class="dd-list" id="city-list" role="listbox"></ul>
   </div>
 
   <div id="areas"></div>
@@ -140,39 +170,73 @@
     // ---- SETTINGS ----
     // Full address on purpose: it works wherever Wix shows this page (embedded site, WebView or preview).
     const API_ENDPOINT = "https://r1map.onrender.com/api/restaurants";
-    // Optional top section like your mock-up (region pill, Map and Order Online buttons, banner photo).
-    // Your Wix page already has these above this box, so it is OFF by default. To use it here, set show to true
-    // and fill in the web addresses. Anything left as "" is hidden.
-    const TOP = {
-      show: true,
-      region: "432 Midland Region",
-      regionUrl: "",                                           // optional: address of a region picker page
-      mapUrl: "https://r1map.onrender.com/",                   // the restaurant map
-      orderUrl: "https://www.lokaalr1.com/online-ordering",    // your Order Online page
-      heroImage: "https://r1map.onrender.com/banner.jpg",      // fallback banner if the CMS has none (upload banner.jpg to the public folder)
-    };
     const DEFAULT_STATE = "TX"; // shown after the city (e.g. "Midland, TX") unless the address already has a state
+    const TOP = {
+      mapUrl: "https://r1map.onrender.com/",                   // the "Open Map" button ("" hides it)
+      heroImage: "https://r1map.onrender.com/banner.jpg",      // fallback banner if the CMS has none
+    };
 
     const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
-    const icon = (id, cls) => '<svg' + (cls ? ' class="' + cls + '"' : "") + '><use href="#' + id + '"/></svg>';
-
-    (function setupTop() {
-      if (!TOP.show) return;
-      document.getElementById("top").classList.add("show");
-      const link = (id, url) => { const el = document.getElementById(id); if (url) el.href = url; else el.style.display = "none"; };
-      document.getElementById("region-text").textContent = TOP.region;
-      if (TOP.region) { const r = document.getElementById("region-pill"); if (TOP.regionUrl) r.href = TOP.regionUrl; } else document.getElementById("region-pill").style.display = "none";
-      link("map-pill", TOP.mapUrl); link("order-pill", TOP.orderUrl);
-      if (!TOP.mapUrl && !TOP.orderUrl) document.querySelector(".pill-row").style.display = "none";
-        })();
-
-    // ---- BANNER (changes with the picked city, from the CityBanners collection in the CMS) ----
-    let banners = []; // [{ city, image }]
     const cleanCity = (c) => String(c || "").replace(/[,\s]+(tx|texas)\.?$/i, "").trim();
+    const icon = (id, cls) => '<svg' + (cls ? ' class="' + cls + '"' : "") + '><use href="#' + id + '"/></svg>';
+    const $ = (id) => document.getElementById(id);
+
+    let all = [];               // every restaurant
+    let banners = [];           // [{ city, image }]
+    let region = "", city = "", area = "", openId = null;
+    let regionLabels = new Map(), cityLabels = new Map();
+
+    // Open Map button
+    if (TOP.mapUrl) { const m = $("map-btn"); m.href = TOP.mapUrl; m.style.display = "flex"; }
+
+    const stateOf = (r) => {
+      const m = String(r.address || "").match(/\b([A-Za-z]{2})\b\s*\d{5}(?:-\d{4})?\s*$/) || String(r.address || "").match(/,\s*([A-Za-z]{2})\s*$/);
+      return m ? m[1].toUpperCase() : DEFAULT_STATE;
+    };
+    const inRegion = (r) => !region || norm(r.region) === region;
+
+    // ---- dropdown helpers ----
+    function closeLists() {
+      document.querySelectorAll(".dd-list").forEach((l) => l.classList.remove("open"));
+      ["city-btn", "region-btn"].forEach((id) => $(id).setAttribute("aria-expanded", "false"));
+    }
+    function toggleList(btnId, listId) {
+      const list = $(listId), willOpen = !list.classList.contains("open");
+      closeLists();
+      list.classList.toggle("open", willOpen);
+      $(btnId).setAttribute("aria-expanded", willOpen);
+    }
+    const listHtml = (items, selKey) => items.map((it) =>
+      '<li role="option" data-key="' + esc(it.key) + '"' + (it.key === selKey ? ' class="sel"' : "") + ">" +
+      (it.key === selKey ? icon("i-check") : icon(it.icon || "i-building")) + "<span>" + esc(it.text) + "</span></li>").join("");
+
+    function buildRegionList() {
+      regionLabels = new Map();
+      for (const r of all) if (r.region && !regionLabels.has(norm(r.region))) regionLabels.set(norm(r.region), r.region);
+      $("region-wrap").style.display = regionLabels.size ? "block" : "none";
+      const items = [{ key: "", text: "All Regions", icon: "i-mapin" }].concat([...regionLabels.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, t]) => ({ key: k, text: t, icon: "i-mapin" })));
+      $("region-list").innerHTML = listHtml(items, region);
+    }
+    function buildCityList() {
+      cityLabels = new Map();
+      for (const r of all.filter(inRegion)) if (r.city && !cityLabels.has(norm(r.city))) cityLabels.set(norm(r.city), r.city);
+      const items = [{ key: "", text: "All Cities" }].concat([...cityLabels.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, t]) => ({ key: k, text: t })));
+      $("city-list").innerHTML = listHtml(items, city);
+    }
+    function buildAreas() {
+      const box = $("areas");
+      const areas = new Map();
+      if (city) for (const r of all.filter(inRegion)) if (norm(r.city) === city && r.area) areas.set(norm(r.area), r.area);
+      if (!areas.size) { box.className = ""; box.innerHTML = ""; return; }
+      const chips = [{ key: "", text: "All of " + cityLabels.get(city) }].concat([...areas.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, t]) => ({ key: k, text: t })));
+      box.innerHTML = chips.map((c) => '<button data-key="' + esc(c.key) + '"' + (c.key === area ? ' class="sel"' : "") + ">" + esc(c.text) + "</button>").join("");
+      box.className = "show";
+    }
+
+    // ---- banner (changes with the picked city, from the CityBanners collection) ----
     function setBanner() {
-      if (!TOP.show) return;
-      const h = document.getElementById("hero");
+      const h = $("hero");
       const byCity = (k) => (banners.find((b) => norm(cleanCity(b.city)) === k) || {}).image;
       const url = (city && byCity(city)) || byCity("all cities") || byCity("default") || byCity("all") || TOP.heroImage;
       if (!url) { h.classList.remove("show"); return; }
@@ -182,101 +246,76 @@
       img.src = url;
     }
 
-    let all = [];              // every restaurant
-    let city = "";             // normalized city, "" = all cities
-    let area = "";             // normalized area, "" = whole city
-    let cityLabels = new Map();// norm city -> display text
-
-    const btn = document.getElementById("city-btn");
-    const list = document.getElementById("city-list");
-    const label = document.getElementById("city-label");
-
-    function stateOf(r) {
-      const m = String(r.address || "").match(/\b([A-Za-z]{2})\b\s*\d{5}(?:-\d{4})?\s*$/) || String(r.address || "").match(/,\s*([A-Za-z]{2})\s*$/);
-      return m ? m[1].toUpperCase() : DEFAULT_STATE;
+    // ---- restaurant rows ----
+    function actionsHtml(r) {
+      const btn = (cls, ic, label, href) => href
+        ? '<a class="act ' + cls + '" href="' + esc(href) + '"' + (href.indexOf("tel:") === 0 ? "" : ' target="_top"') + ">" + icon(ic) + "<span>" + label + "</span></a>"
+        : '<span class="act ' + cls + ' off">' + icon(ic) + "<span>" + label + "</span></span>";
+      return '<div class="acts">' +
+        btn("menu", "i-menu", "Menu", r.menuUrl) +
+        btn("call", "i-phone", "Call", r.phone ? "tel:" + r.phone : "") +
+        btn("pickup", "i-bag", "Pickup Order", r.pickupMenuUrl) +
+        btn("delivery", "i-truck", "Delivery Order", r.deliveryUrl) + "</div>";
     }
-
-    function buildCityList() {
-      cityLabels = new Map();
-      for (const r of all) if (r.city && !cityLabels.has(norm(r.city))) cityLabels.set(norm(r.city), r.city);
-      const cities = [...cityLabels.entries()].sort((a, b) => a[1].localeCompare(b[1]));
-      const items = [{ key: "", text: "All Cities" }].concat(cities.map(([k, t]) => ({ key: k, text: t })));
-      list.innerHTML = items.map((it) =>
-        '<li role="option" data-key="' + esc(it.key) + '"' + (it.key === city ? ' class="sel"' : "") + ">" +
-        (it.key === city ? icon("i-check") : icon("i-building")) + "<span>" + esc(it.text) + "</span></li>").join("");
+    function rowHtml(r) {
+      const open = String(r.id) === openId;
+      const photo = (r.photos || [])[0];
+      const thumb = '<div class="thumb">' + (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.remove()">' : "🍽️") + "</div>";
+      const place = r.city ? esc(cityLabels.get(norm(r.city)) || r.city) + ", " + esc(stateOf(r)) : esc(r.address || "");
+      return '<div class="rest' + (open ? " open" : "") + '">' +
+        '<div class="rest-head" data-id="' + esc(r.id) + '">' + thumb +
+        '<div class="info"><div class="name">' + esc(r.name) + "</div>" + (place ? '<div class="where">' + icon("i-pin") + "<span>" + place + "</span></div>" : "") + "</div>" +
+        icon(open ? "i-chev-up" : "i-chev-right", "chev") + "</div>" + (open ? actionsHtml(r) : "") + "</div>";
     }
-
-    function buildAreas() {
-      const box = document.getElementById("areas");
-      if (!city) { box.className = ""; box.innerHTML = ""; return; }
-      const areas = new Map();
-      for (const r of all) if (norm(r.city) === city && r.area) areas.set(norm(r.area), r.area);
-      if (!areas.size) { box.className = ""; box.innerHTML = ""; return; }
-      const chips = [{ key: "", text: "All of " + cityLabels.get(city) }].concat([...areas.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, t]) => ({ key: k, text: t })));
-      box.innerHTML = chips.map((c) => '<button data-key="' + esc(c.key) + '"' + (c.key === area ? ' class="sel"' : "") + ">" + esc(c.text) + "</button>").join("");
-      box.className = "show";
-    }
-
     function render() {
-      const shown = all
-        .filter((r) => (!city || norm(r.city) === city) && (!area || norm(r.area) === area))
+      const shown = all.filter((r) => inRegion(r) && (!city || norm(r.city) === city) && (!area || norm(r.area) === area))
         .sort((a, b) => String(a.name).localeCompare(String(b.name)));
       const where = !city ? "All Restaurants" : "Restaurants in " + cityLabels.get(city) + (area ? " · " + (all.find((r) => norm(r.area) === area) || {}).area : "");
-      document.getElementById("results-title").textContent = where;
-      document.getElementById("results-count").textContent = shown.length + (shown.length === 1 ? " Restaurant" : " Restaurants");
-      const rows = document.getElementById("rows");
-      if (!shown.length) { rows.innerHTML = '<div class="msg">No restaurants found here yet.</div>'; return; }
-      rows.innerHTML = shown.map((r) => {
-        const photo = (r.photos || [])[0];
-        const thumb = '<div class="thumb">' + (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.remove()">' : "🍽️") + "</div>";
-        const place = r.city ? esc(cityLabels.get(norm(r.city)) || r.city) + ", " + esc(stateOf(r)) : esc(r.address || "");
-        const inner = thumb + '<div class="info"><div class="name">' + esc(r.name) + "</div>" + (place ? '<div class="where">' + icon("i-pin") + "<span>" + place + "</span></div>" : "") + "</div>" + icon("i-chev-right", "chev-right");
-        // target="_top" opens the menu in the whole Wix page, not inside this small box
-        return r.menuUrl
-          ? '<a class="row" href="' + esc(r.menuUrl) + '" target="_top">' + inner + "</a>"
-          : '<div class="row nolink">' + inner + "</div>";
-      }).join("");
+      $("results-title").textContent = where;
+      $("results-count").textContent = shown.length + (shown.length === 1 ? " Restaurant" : " Restaurants");
+      $("rows").innerHTML = shown.length ? shown.map(rowHtml).join("") : '<div class="msg">No restaurants found here yet.</div>';
     }
+    function refreshAll() { buildRegionList(); buildCityList(); buildAreas(); render(); setBanner(); }
 
-    function setCity(key) {
-      city = key; area = "";
-      label.textContent = key ? cityLabels.get(key) : "Select City";
-      buildCityList(); buildAreas(); render(); setBanner();
-    }
-
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const open = !list.classList.contains("open");
-      list.classList.toggle("open", open);
-      btn.setAttribute("aria-expanded", open);
-    });
-    list.addEventListener("click", (e) => {
+    // ---- events ----
+    $("city-btn").addEventListener("click", (e) => { e.stopPropagation(); toggleList("city-btn", "city-list"); });
+    $("region-btn").addEventListener("click", (e) => { e.stopPropagation(); toggleList("region-btn", "region-list"); });
+    $("city-list").addEventListener("click", (e) => {
       const li = e.target.closest("li"); if (!li) return;
-      list.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
-      setCity(li.dataset.key);
+      city = li.dataset.key; area = ""; openId = null; closeLists();
+      $("city-label").textContent = city ? cityLabels.get(city) : "Select City";
+      refreshAll();
     });
-    document.getElementById("areas").addEventListener("click", (e) => {
-      const b = e.target.closest("button"); if (!b) return;
-      area = b.dataset.key; buildAreas(); render();
+    $("region-list").addEventListener("click", (e) => {
+      const li = e.target.closest("li"); if (!li) return;
+      region = li.dataset.key; city = ""; area = ""; openId = null; closeLists();
+      $("region-label").textContent = region ? regionLabels.get(region) : "Select Region";
+      $("city-label").textContent = "Select City";
+      refreshAll();
     });
-    document.addEventListener("click", () => { list.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); });
+    $("areas").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; area = b.dataset.key; openId = null; buildAreas(); render(); });
+    $("rows").addEventListener("click", (e) => {
+      const head = e.target.closest(".rest-head"); if (!head) return;
+      openId = openId === head.dataset.id ? null : head.dataset.id; render();
+    });
+    document.addEventListener("click", closeLists);
 
     // The free Render server can be asleep for up to a minute, so retry a few times.
     async function load(attempt = 1) {
-      document.getElementById("rows").innerHTML = '<div class="msg">' + (attempt === 1 ? "Loading restaurants…" : "Waking up the server… (try " + attempt + ")") + "</div>";
+      $("rows").innerHTML = '<div class="msg">' + (attempt === 1 ? "Loading restaurants…" : "Waking up the server… (try " + attempt + ")") + "</div>";
       try {
         const res = await fetch(API_ENDPOINT, { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const json = await res.json();
         if (!json || !Array.isArray(json.restaurants)) throw new Error("Bad response");
         // "Seminole Tx" or "Seminole, TX" in the CMS is shown as just "Seminole"
-        all = json.restaurants.map((r) => ({ ...r, city: r.city ? r.city.replace(/[,\s]+(tx|texas)\.?$/i, "").trim() : r.city }));
+        all = json.restaurants.map((r) => ({ ...r, city: r.city ? cleanCity(r.city) : r.city }));
         banners = json.banners || [];
-        buildCityList(); buildAreas(); render(); setBanner();
+        refreshAll();
       } catch (err) {
         console.error(err);
         if (attempt < 12) setTimeout(() => load(attempt + 1), 5000);
-        else document.getElementById("rows").innerHTML = '<div class="msg">Couldn\'t load restaurants. Please reload the page.<br><small style="font-weight:500;opacity:.7">(' + esc(err && err.message) + ")</small></div>";
+        else $("rows").innerHTML = '<div class="msg">Couldn\'t load restaurants. Please reload the page.<br><small style="font-weight:500;opacity:.7">(' + esc(err && err.message) + ")</small></div>";
       }
     }
     load();

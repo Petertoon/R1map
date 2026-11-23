@@ -125,6 +125,7 @@ router.get("/", async (req, res) => {
   try {
     const results = await Promise.all(sites.map(fetchSite));
     const restaurants = results.flat();
+    res.set("Access-Control-Allow-Origin", "*"); // lets the Wix pages read this list from another address
     res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     res.json({ count: restaurants.length, restaurants });
   } catch (err) {

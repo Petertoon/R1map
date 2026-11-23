@@ -1,4 +1,3 @@
-
 // routes/restaurants.js
 const express = require("express");
 const router = express.Router();
@@ -45,6 +44,10 @@ function getField(d, key, fallback) {
   const hit = names.find((n) => n.toLowerCase() === lower && d[n] != null && d[n] !== "")
     || (fallback && names.find((n) => fallback.test(n) && d[n] != null && d[n] !== ""));
   return hit ? d[hit] : null;
+}
+
+function cleanText(v) {
+  return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
 function cleanPhone(value) {
@@ -100,6 +103,8 @@ async function fetchSite(site) {
         lng,
         address: d[f.address] || null,
         cuisine: d[f.cuisine] || null,
+        city: cleanText(getField(d, f.city || "city")),
+        area: cleanText(getField(d, f.area || "area")),
         rating: parseFloat(d[f.rating]) || null,
         hours: getField(d, f.hours, /hours/i),
         status: d[f.status] || null,

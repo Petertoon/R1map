@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Find a Restaurant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --maroon: #7a3b32;       /* header bars and borders */
+      --cream: #f1e8d8;        /* dropdown and rows */
+      --green: #1b5e20;        /* restaurant names */
+      --ink: #2b2b2b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: transparent; font-family: "Montserrat", system-ui, -apple-system, sans-serif; color: var(--ink); }
+    body { padding: 14px 12px 24px; }
+
+    .title { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 22px; font-weight: 700; margin: 4px 4px 12px; }
+    .title svg { width: 28px; height: 28px; flex: none; }
+
+    /* ---- city dropdown ---- */
+    .select-wrap { position: relative; }
+    #city-btn {
+      width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--cream);
+      border: 3px solid var(--maroon); border-radius: 28px; font: 600 20px "Montserrat", system-ui, sans-serif; color: var(--maroon); cursor: pointer; text-align: left;
+    }
+    #city-btn svg.icon { width: 26px; height: 26px; flex: none; }
+    #city-btn .label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #city-btn .chev { width: 22px; height: 22px; flex: none; transition: transform 0.15s; }
+    #city-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+    #city-list {
+      display: none; position: absolute; left: 10px; right: 10px; top: calc(100% + 6px); z-index: 10; margin: 0; padding: 6px; list-style: none;
+      background: var(--cream); border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.45); max-height: 340px; overflow-y: auto;
+    }
+    #city-list.open { display: block; }
+    #city-list li {
+      display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; font-size: 17px; font-weight: 600; color: #3a2a26; cursor: pointer;
+    }
+    #city-list li svg { width: 22px; height: 22px; flex: none; color: var(--maroon); }
+    #city-list li.sel { background: var(--maroon); color: #fff; }
+    #city-list li.sel svg { color: #fff; }
+
+    /* ---- area chips ---- */
+    #areas { display: none; flex-wrap: wrap; gap: 8px; margin: 12px 2px 0; }
+    #areas.show { display: flex; }
+    #areas button {
+      border: 2px solid var(--maroon); background: transparent; color: #f1e8d8; border-radius: 20px; padding: 7px 14px; font: 600 14px "Montserrat", system-ui, sans-serif; cursor: pointer;
+    }
+    #areas button.sel { background: var(--cream); color: var(--maroon); }
+
+    /* ---- results ---- */
+    .results { margin-top: 16px; background: var(--cream); border-radius: 18px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    .results-head { display: flex; align-items: center; gap: 12px; background: var(--maroon); color: #fff; padding: 12px 14px; }
+    .results-head svg { width: 28px; height: 28px; flex: none; }
+    .results-head h2 { flex: 1; margin: 0; font-size: 20px; font-weight: 700; line-height: 1.2; }
+    .count { flex: none; background: var(--cream); color: #3a2a26; border-radius: 16px; padding: 5px 12px; font-size: 14px; font-weight: 600; }
+
+    .row { display: flex; align-items: center; gap: 14px; padding: 10px 14px; text-decoration: none; color: inherit; border-top: 1px solid #b9ab97; }
+    .row:first-of-type { border-top: 0; }
+    .thumb { flex: none; width: 76px; height: 56px; border-radius: 10px; overflow: hidden; background: #d8cdb9; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .info { flex: 1; min-width: 0; }
+    .name { font-size: 18px; font-weight: 700; color: var(--green); line-height: 1.2; }
+    .where { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 15px; font-weight: 500; color: #3a3a3a; }
+    .where svg { width: 16px; height: 16px; flex: none; color: var(--green); }
+    .chev-right { width: 24px; height: 24px; flex: none; color: var(--green); }
+    .row.nolink { cursor: default; }
+    .row.nolink .chev-right { visibility: hidden; }
+    .msg { padding: 22px 16px; text-align: center; font-size: 16px; font-weight: 600; color: #3a2a26; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M3 21V9l5-3v15M8 21V3l8 3v15M16 21V11l5 2v8M2 21h20M11 9v.01M11 13v.01M11 17v.01M5.5 12v.01M5.5 16v.01M18.5 16v.01"/>
+    </symbol>
+    <symbol id="i-fork" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 3v7a2 2 0 0 0 2 2v9M9 3v7a2 2 0 0 1-2 2M7 3v6M17 21V3c-2.2 1.5-3 4.5-3 8h3"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 9 7 7 7-7"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 5 5L19.5 7"/></symbol>
+  </svg>
+
+  <div class="title"><svg style="color:#fff"><use href="#i-fork"/></svg><span>Find a Restaurant</span></div>
+
+  <div class="select-wrap">
+    <button id="city-btn" aria-haspopup="listbox" aria-expanded="false">
+      <svg class="icon"><use href="#i-building"/></svg>
+      <span class="label" id="city-label">Select City</span>
+      <svg class="chev"><use href="#i-chev-down"/></svg>
+    </button>
+    <ul id="city-list" role="listbox"></ul>
+  </div>
+
+  <div id="areas"></div>
+
+  <div class="results">
+    <div class="results-head">
+      <svg><use href="#i-building"/></svg>
+      <h2 id="results-title">Restaurants</h2>
+      <span class="count" id="results-count"></span>
+    </div>
+    <div id="rows"><div class="msg">Loading restaurants…</div></div>
+  </div>
+
+  <script>
+    // ---- SETTINGS ----
+    const API_ENDPOINT = "/api/restaurants";
+    const DEFAULT_STATE = "TX"; // shown after the city (e.g. "Midland, TX") unless the address already has a state
+
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    const icon = (id, cls) => '<svg' + (cls ? ' class="' + cls + '"' : "") + '><use href="#' + id + '"/></svg>';
+
+    let all = [];              // every restaurant
+    let city = "";             // normalized city, "" = all cities
+    let area = "";             // normalized area, "" = whole city
+    let cityLabels = new Map();// norm city -> display text
+
+    const btn = document.getElementById("city-btn");
+    const list = document.getElementById("city-list");
+    const label = document.getElementById("city-label");
+
+    function stateOf(r) {
+      const m = String(r.address || "").match(/\b([A-Za-z]{2})\b\s*\d{5}(?:-\d{4})?\s*$/) || String(r.address || "").match(/,\s*([A-Za-z]{2})\s*$/);
+      return m ? m[1].toUpperCase() : DEFAULT_STATE;
+    }
+
+    function buildCityList() {
+      cityLabels = new Map();
+      for (const r of all) if (r.city && !cityLabels.has(norm(r.city))) cityLabels.set(norm(r.city), r.city);
+      const cities = [...cityLabels.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+      const items = [{ key: "", text: "All Cities" }].concat(cities.map(([k, t]) => ({ key: k, text: t })));
+      list.innerHTML = items.map((it) =>
+        '<li role="option" data-key="' + esc(it.key) + '"' + (it.key === city ? ' class="sel"' : "") + ">" +
+        (it.key === city ? icon("i-check") : icon("i-building")) + "<span>" + esc(it.text) + "</span></li>").join("");
+    }
+
+    function buildAreas() {
+      const box = document.getElementById("areas");
+      if (!city) { box.className = ""; box.innerHTML = ""; return; }
+      const areas = new Map();
+      for (const r of all) if (norm(r.city) === city && r.area) areas.set(norm(r.area), r.area);
+      if (!areas.size) { box.className = ""; box.innerHTML = ""; return; }
+      const chips = [{ key: "", text: "All of " + cityLabels.get(city) }].concat([...areas.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, t]) => ({ key: k, text: t })));
+      box.innerHTML = chips.map((c) => '<button data-key="' + esc(c.key) + '"' + (c.key === area ? ' class="sel"' : "") + ">" + esc(c.text) + "</button>").join("");
+      box.className = "show";
+    }
+
+    function render() {
+      const shown = all
+        .filter((r) => (!city || norm(r.city) === city) && (!area || norm(r.area) === area))
+        .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+      const where = !city ? "All Restaurants" : "Restaurants in " + cityLabels.get(city) + (area ? " · " + (all.find((r) => norm(r.area) === area) || {}).area : "");
+      document.getElementById("results-title").textContent = where;
+      document.getElementById("results-count").textContent = shown.length + (shown.length === 1 ? " Restaurant" : " Restaurants");
+      const rows = document.getElementById("rows");
+      if (!shown.length) { rows.innerHTML = '<div class="msg">No restaurants found here yet.</div>'; return; }
+      rows.innerHTML = shown.map((r) => {
+        const photo = (r.photos || [])[0];
+        const thumb = '<div class="thumb">' + (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.remove()">' : "🍽️") + "</div>";
+        const place = r.city ? esc(cityLabels.get(norm(r.city)) || r.city) + ", " + esc(stateOf(r)) : esc(r.address || "");
+        const inner = thumb + '<div class="info"><div class="name">' + esc(r.name) + '</div><div class="where">' + icon("i-pin") + "<span>" + place + "</span></div></div>" + icon("i-chev-right", "chev-right");
+        // target="_top" opens the menu in the whole Wix page, not inside this small box
+        return r.menuUrl
+          ? '<a class="row" href="' + esc(r.menuUrl) + '" target="_top">' + inner + "</a>"
+          : '<div class="row nolink">' + inner + "</div>";
+      }).join("");
+    }
+
+    function setCity(key) {
+      city = key; area = "";
+      label.textContent = key ? cityLabels.get(key) : "Select City";
+      buildCityList(); buildAreas(); render();
+    }
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = !list.classList.contains("open");
+      list.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open);
+    });
+    list.addEventListener("click", (e) => {
+      const li = e.target.closest("li"); if (!li) return;
+      list.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
+      setCity(li.dataset.key);
+    });
+    document.getElementById("areas").addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      area = b.dataset.key; buildAreas(); render();
+    });
+    document.addEventListener("click", () => { list.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); });
+
+    // The free Render server can be asleep for up to a minute, so retry a few times.
+    async function load(attempt = 1) {
+      document.getElementById("rows").innerHTML = '<div class="msg">' + (attempt === 1 ? "Loading restaurants…" : "Waking up the server… (try " + attempt + ")") + "</div>";
+      try {
+        const res = await fetch(API_ENDPOINT, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+        if (!json || !Array.isArray(json.restaurants)) throw new Error("Bad response");
+        all = json.restaurants;
+        buildCityList(); buildAreas(); render();
+      } catch (err) {
+        console.error(err);
+        if (attempt < 6) setTimeout(() => load(attempt + 1), 4000);
+        else document.getElementById("rows").innerHTML = '<div class="msg">Couldn\'t load restaurants. Please reload the page.</div>';
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
